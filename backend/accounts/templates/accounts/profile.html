@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  nav.navbar { display: none !important; }
+
+  .dashboard-header {
+      background: #198754;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 8px;
+      margin-bottom: 20px;
+  }
+  .logout-btn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+  }
+  .card {
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  }
+  .barcode-section input {
+      border-radius: 8px;
+      padding: 10px;
+  }
+  .verified-product {
+      border: 1px solid #198754;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      background: #f8fff9;
+  }
+  .verified-product img {
+      max-width: 120px;
+      border-radius: 10px;
+      margin-right: 15px;
+  }
+</style>
+
+<div class="container mt-4">
+
+  <!-- Dashboard Header -->
+  <div class="dashboard-header position-relative">
+      <h2>Welcome, {{ request.user.username }}</h2>
+      <a href="{% url 'logout_user' %}" class="btn btn-danger logout-btn">Logout</a>
+  </div>
+
+  <div class="row">
+    <!-- Cart Section -->
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white fw-bold">🛒 Your Cart</div>
+        <div class="card-body">
+          {% if cart_items %}
+            <ul class="list-group">
+              {% for item in cart_items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  {{ item.product.name }} (x{{ item.quantity }})
+                  <span class="fw-bold">Ksh {{ item.total_price }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+            <div class="mt-3 text-end">
+              <a href="{% url 'checkout' %}" class="btn btn-success">Proceed to Checkout</a>
+            </div>
+          {% else %}
+            <p class="text-muted">
+              Your cart is empty. 
+              <a href="{% url 'marketplace_home' %}">Browse products</a>
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Barcode Verification -->
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header bg-warning fw-bold">🔍 Verify Product by Barcode</div>
+        <div class="card-body barcode-section">
+          <form method="POST" action="{% url 'verify_product' %}">
+            {% csrf_token %}
+            <div class="input-group">
+              <input type="text" name="barcode" class="form-control" placeholder="Enter or scan barcode" required>
+              <button type="submit" class="btn btn-dark">Verify</button>
+            </div>
+          </form>
+
+          {% if verification_result %}
+            {% if verification_result.status == "success" %}
+              <div class="verified-product d-flex align-items-center">
+                {% if verification_result.product.image %}
+                  <img src="{{ verification_result.product.image.url }}" alt="{{ verification_result.product.name }}">
+                {% endif %}
+                <div>
+                  <h5>{{ verification_result.product.name }}</h5>
+                  <p class="mb-1"><strong>Dealer:</strong> {{ verification_result.product.dealer }}</p>
+                  <p class="mb-1"><strong>Price:</strong> Ksh {{ verification_result.product.price }}</p>
+
+                  <form method="POST" action="{% url 'add_to_cart' verification_result.product.id %}">
+                    {% csrf_token %}
+                    <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" style="width: 100px;">
+                    <button type="submit" class="btn btn-success">Add to Cart & Checkout</button>
+                  </form>
+                </div>
+              </div>
+            {% else %}
+              <div class="alert alert-danger mt-3">
+                {{ verification_result.message }}
+              </div>
+              <a href="{% url 'marketplace_home' %}" class="btn btn-outline-primary mt-2">
+                Browse Other Products
+              </a>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

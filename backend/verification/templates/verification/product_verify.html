@@ -1,0 +1,25 @@
+{% extends "verification/base.html" %}
+{% block title %}Verification Result - MavunoLink{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold text-success mb-4">Verification Result</h2>
+
+{% if is_valid %}
+<div class="alert alert-success">
+    ✅ This product is <strong>Genuine</strong> and safe for use.
+</div>
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ product.name }}</h5>
+        <p><strong>Batch:</strong> {{ product.batch_number }}</p>
+        <p><strong>Expiry:</strong> {{ product.expiry_date }}</p>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-danger">
+    ❌ This product is <strong>NOT valid</strong>. Please avoid using it.
+</div>
+{% endif %}
+
+<a href="{% url 'verify_product_page' %}" class="btn btn-outline-success mt-4">Check Another Product</a>
+{% endblock %}

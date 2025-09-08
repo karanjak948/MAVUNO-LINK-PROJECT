@@ -1,0 +1,383 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MavunoLink</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/product.css' %}">
+  <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+  <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+
+  <style>
+    /* Improve dropdown visibility on dark navbar */
+    .navbar-dark .dropdown-menu {
+      background-color: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: .6rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    }
+    .navbar-dark .dropdown-item { color: #212529; }
+    .navbar-dark .dropdown-item:hover { background-color: #198754; color:#fff; }
+
+    /* Optional: open dropdowns on hover on lg+ screens */
+    @media (min-width: 992px) {
+      .navbar .dropdown:hover .dropdown-menu { display: block; }
+      .navbar .dropdown-toggle::after { margin-left: .4rem;} 
+    }
+
+    /* Hero background fallback if image missing */
+    .hero {
+      background: linear-gradient(110deg, rgba(25,135,84,.95), rgba(25,135,84,.75)),
+                  url("{% static 'images/hero-farm.jpg' %}") center/cover no-repeat;
+      color: #fff;
+    }
+
+    /* Section titles */
+    .section-title {
+      font-weight: 800; letter-spacing: .3px;
+    }
+
+    /* Feature cards */
+    .feature-card { border:0; border-radius: 1rem; }
+    .feature-card .card-body { padding: 1.25rem 1.25rem 1.5rem; }
+
+    /* Category chips */
+    .chip {
+      display:inline-block; padding:.5rem .85rem; border-radius:2rem;
+      background:#f1f5f9; color:#0f172a; margin:.25rem .3rem; font-weight:600;
+      border:1px solid #e2e8f0;
+    }
+    .chip:hover { background:#e2f7ec; border-color:#b7ebcd; }
+
+    /* Stats band */
+    .stat { font-size:2rem; font-weight:800; color:#198754; }
+    .stat-label { color:#64748b; font-weight:600; }
+
+    /* Product card image fallback */
+    .product-card-img {
+      height: 200px; object-fit: cover; background:#f8fafc;
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+<div class="container mt-3">
+    {% for message in messages %}
+      <div class="alert 
+        {% if message.tags == 'error' %} alert-danger 
+        {% elif message.tags == 'success' %} alert-success 
+        {% elif message.tags == 'info' %} alert-info 
+        {% else %} alert-secondary {% endif %} 
+        alert-dismissible fade show shadow-sm" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+<body class="bg-light">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{% url 'home' %}">🌱 MavunoLink</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+              aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">🏠 Home</a></li>
+
+          <!-- Marketplace -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">🛒 Marketplace</a>
+            <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}">All Products</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li class="dropdown-header">Sort by</li>
+              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=price_asc">Price: Low → High</a></li>
+              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=price_desc">Price: High → Low</a></li>
+              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=latest">Latest</a></li>
+              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=popular">Most Popular</a></li>
+              <li><a class="dropdown-item" href="{% url 'dealers' %}">Dealers</a></li>
+            </ul>
+          </li>
+
+          <!-- Verification -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="verifyDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">✅ Verification</a>
+            <ul class="dropdown-menu" aria-labelledby="verifyDropdown">
+              <li><a class="dropdown-item" href="{% url 'verify_home' %}">Verify Home</a></li>
+              <li><a class="dropdown-item" href="{% url 'verify_form' %}">Check a Product</a></li>
+              <li><a class="dropdown-item" href="{% url 'verify_result' %}">Verification Results</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="{% url 'reviews_home' %}">⭐ Reviews</a></li>
+          <!-- <li class="nav-item"><a class="nav-link" href="{% url 'chatbot_home' %}">🤖 Chatbot</a></li> -->
+
+          <!-- Account -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">👤 Account</a>
+            <ul class="dropdown-menu" aria-labelledby="accountDropdown">
+              <li><a class="dropdown-item" href="{% url 'login_user' %}">Login</a></li>
+              <li><a class="dropdown-item" href="{% url 'register_user' %}">Register</a></li>
+              <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+              <li><a class="dropdown-item" href="{% url 'logout_user' %}">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- FILTER BAR (only on marketplace pages) -->
+  {% if request.path|slice:":12" == "/marketplace" %}
+  <section class="container mt-3">
+    <form class="row g-2 align-items-center">
+      <div class="col-md-8">
+        <input type="text" class="form-control" name="q" placeholder="Search products..."
+               value="{{ request.GET.q }}">
+      </div>
+      <div class="col-md-4">
+        <select name="category" class="form-select">
+          <option value="">All Categories</option>
+          <option value="seeds" {% if request.GET.category == "seeds" %}selected{% endif %}>Seeds</option>
+          <option value="tools" {% if request.GET.category == "tools" %}selected{% endif %}>Farming Tools</option>
+          <option value="fertilizers" {% if request.GET.category == "fertilizers" %}selected{% endif %}>Fertilizers</option>
+          <option value="machinery" {% if request.GET.category == "machinery" %}selected{% endif %}>Machinery</option>
+        </select>
+      </div>
+    </form>
+  </section>
+  {% endif %}
+
+  <!-- HOMEPAGE-ONLY CONTENT -->
+  {% if request.path == "/" %}
+
+  <!-- HERO -->
+  <section class="hero text-center py-5">
+    <div class="container">
+      <h1 class="fw-bold display-5">Connecting Agriculture with Technology</h1>
+      <p class="lead mt-2">Buy, verify and review agricultural products with confidence.</p>
+      <div class="mt-3">
+        <a href="{% url 'marketplace_home' %}" class="btn btn-light btn-lg me-2">Explore Marketplace</a>
+        <a href="{% url 'verify_form' %}" class="btn btn-outline-light btn-lg">Verify a Product</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="container my-5">
+    <div class="row align-items-center g-4">
+      <div class="col-md-6 text-center">
+        <img src="{% static 'images/farmers.jpg' %}" class="img-fluid rounded shadow" alt="Farmers">
+      </div>
+      <div class="col-md-6">
+        <h2 class="section-title text-success">What is MavunoLink?</h2>
+        <p class="text-muted">
+          MavunoLink is a digital hub for farmers, dealers, and consumers. Discover seeds, tools,
+          fertilizers, and machinery from reliable suppliers — and verify products before you buy.
+        </p>
+        <ul class="list-unstyled">
+          <li>• Seamless marketplace with smart sorting and search</li>
+          <li>• Built-in product verification & barcode scanning</li>
+          <li>• Real reviews from real buyers</li>
+          <li>• Helpful chatbot guidance</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="bg-light py-5">
+    <div class="container">
+      <h2 class="text-center section-title mb-4">Why Choose MavunoLink?</h2>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card feature-card shadow h-100">
+            <div class="card-body">
+              <h5 class="card-title">🌍 Wide Marketplace</h5>
+              <p class="card-text">From seeds to tractors — discover everything you need in one place.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card feature-card shadow h-100">
+            <div class="card-body">
+              <h5 class="card-title">✅ Product Verification</h5>
+              <p class="card-text">Scan or check codes to avoid counterfeits and buy with confidence.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card feature-card shadow h-100">
+            <div class="card-body">
+              <h5 class="card-title">⭐ Trusted Reviews</h5>
+              <p class="card-text">See real experiences and ratings from other farmers and buyers.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="container my-5">
+    <h2 class="section-title text-success mb-4">🌱 Featured Products</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+          <img src="{% static 'images/tomatoes.jpg' %}" class="card-img-top product-card-img" alt="Tomatoes">
+          <div class="card-body text-center">
+            <h5 class="card-title">Tomatoes</h5>
+            <p class="card-text text-muted">Fresh farm tomatoes from trusted farmers.</p>
+            <a href="/marketplace/?q=tomatoes" class="btn btn-success">Explore</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+          <img src="{% static 'images/maize.jpg' %}" class="card-img-top product-card-img" alt="Maize">
+          <div class="card-body text-center">
+            <h5 class="card-title">Maize</h5>
+            <p class="card-text text-muted">High-yield maize seeds for strong harvests.</p>
+            <a href="/marketplace/?q=maize" class="btn btn-success">Explore</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+          <img src="{% static 'images/fertilizer.png' %}" class="card-img-top product-card-img" alt="Fertilizer">
+          <div class="card-body text-center">
+            <h5 class="card-title">Fertilizers</h5>
+            <p class="card-text text-muted">Verified and effective crop nutrition.</p>
+            <a href="{% url 'marketplace_home' %}?q=fertilizer" class="btn btn-success">Explore</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POPULAR CATEGORIES -->
+  <section class="container my-4">
+    <h2 class="section-title text-success mb-3">Popular Categories</h2>
+    <div>
+      <a class="chip" href="{% url 'marketplace_home' %}?category=seeds">Seeds</a>
+      <a class="chip" href="{% url 'marketplace_home' %}?category=tools">Tools</a>
+      <a class="chip" href="{% url 'marketplace_home' %}?category=fertilizers">Fertilizers</a>
+      <a class="chip" href="{% url 'marketplace_home' %}?category=machinery">Machinery</a>
+      <a class="chip" href="{% url 'marketplace_home' %}?sort=latest">New Arrivals</a>
+      <a class="chip" href="{% url 'marketplace_home' %}?sort=price_asc">Budget Picks</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="container my-5">
+    <div class="row text-center g-4">
+      <div class="col-6 col-md-3">
+        <div class="stat">2.4K+</div>
+        <div class="stat-label">Products</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat">780+</div>
+        <div class="stat-label">Verified Dealers</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat">4.8★</div>
+        <div class="stat-label">Avg. Reviews</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat">24/7</div>
+        <div class="stat-label">Chat Support</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="bg-light py-5">
+    <div class="container">
+      <h2 class="section-title text-center mb-4">How It Works</h2>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card shadow h-100">
+            <div class="card-body">
+              <h5 class="card-title">1) Browse & Compare</h5>
+              <p class="card-text">Use search, categories and sorting to find the best match.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card shadow h-100">
+            <div class="card-body">
+              <h5 class="card-title">2) Verify</h5>
+              <p class="card-text">Check authenticity at <a href="{% url 'verify_form' %}">Verify Product</a> before buying.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card shadow h-100">
+            <div class="card-body">
+              <h5 class="card-title">3) Review</h5>
+              <p class="card-text">Share your experience and help others choose with confidence.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <a href="{% url 'marketplace_home' %}" class="btn btn-success btn-lg">Start Shopping</a>
+      </div>
+    </div>
+  </section>
+
+  {% endif %} <!-- end homepage-only content -->
+
+  <!-- PAGE-SPECIFIC CONTENT -->
+  <main class="container my-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- CHATBOT -->
+  <div id="chatbot-toggle" class="btn btn-success rounded-circle shadow"
+       style="position: fixed; bottom: 20px; right: 20px; font-size: 1.5rem; z-index: 1000;">💬</div>
+  <div id="chatbot-window" class="card shadow-lg hidden"
+       style="position: fixed; bottom: 80px; right: 20px; width: 350px; max-height: 500px; z-index: 1000;">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+      <span>Chatbot Assistant</span>
+      <button id="chatbot-close" class="btn btn-sm btn-light">×</button>
+    </div>
+    <div id="chatbot-body" class="card-body" style="overflow-y: auto; height: 300px;">
+      <p class="text-muted">Hello! How can I help you today?</p>
+    </div>
+    <div id="chatbot-input-container" class="card-footer d-flex">
+      <input type="text" id="chatbot-input" class="form-control me-2" placeholder="Type your message...">
+      <button id="chatbot-send" class="btn btn-success">Send</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-dark text-white text-center py-4 mt-5">
+    <p class="mb-0">© 2025 MavunoLink. Empowering Agriculture with Technology.</p>
+    <small>🌱 Built for farmers, dealers, and communities.</small>
+  </footer>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+  <script src="{% static 'js/product.js' %}"></script>
+  <script src="{% static 'js/chatbot.js' %}"></script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

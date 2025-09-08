@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Chatbot{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); font-family: Arial, sans-serif;">
+  <h2 style="text-align: center; color: #2c3e50;">Chat with Bot</h2>
+  <p style="text-align: center; color: #555;">Ask me anything about our products!</p>
+
+  <form id="chat-form" style="display: flex; gap: 10px; margin-top: 20px;">
+    <input 
+      type="text" 
+      id="user-input" 
+      placeholder="Ask about a product..." 
+      required 
+      style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;"
+    >
+    <button 
+      type="submit" 
+      style="padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s;"
+    >
+      Send
+    </button>
+  </form>
+
+  <div 
+    id="chat-response" 
+    style="margin-top: 30px; background: #f9f9f9; padding: 15px; border-radius: 10px; max-height: 300px; overflow-y: auto; font-size: 1em; color: #333;"
+  ></div>
+</div>
+
+<!-- ✅ Include external chatbot.js -->
+<script src="{% static 'js/chatbot.js' %}"></script>
+{% endblock %}

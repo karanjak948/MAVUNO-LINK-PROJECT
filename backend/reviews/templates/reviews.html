@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4 fw-bold text-success">Customer Reviews</h2>
+
+<div class="list-group shadow-sm">
+    {% for review in reviews %}
+    <div class="list-group-item">
+        <div class="d-flex justify-content-between align-items-center">
+            <strong>{{ review.user.username }}</strong>
+            <span class="badge bg-warning text-dark">{{ review.rating }}/5</span>
+        </div>
+        <p class="mb-1">{{ review.comment }}</p>
+        <small class="text-muted">
+            {% if review.product %}For: {{ review.product.name }}{% elif review.dealer %}Dealer: {{ review.dealer.name }}{% endif %}
+        </small>
+    </div>
+    {% empty %}
+    <p class="text-muted">No reviews available yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

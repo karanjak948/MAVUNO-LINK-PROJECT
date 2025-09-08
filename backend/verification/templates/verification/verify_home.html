@@ -1,0 +1,10 @@
+{% extends "verification/base.html" %}
+{% block title %}Home - MavunoLink{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="fw-bold text-success">Welcome to MavunoLink</h1>
+    <p class="lead mt-3">Protecting farmers from counterfeit agro-products.</p>
+    <a href="{% url 'verify_product_page' %}" class="btn btn-success btn-lg mt-4">Start Verification</a>
+</div>
+{% endblock %}

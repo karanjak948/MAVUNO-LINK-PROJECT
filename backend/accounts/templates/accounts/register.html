@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - MavunoLink</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+    .register-card {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 420px;
+    }
+    .register-card h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #2E7D32;
+    }
+    .form-control {
+      border-radius: 8px;
+    }
+    .btn-register {
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+    .btn-register:hover {
+      background-color: #388E3C;
+    }
+    .extra-links {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .extra-links a {
+      color: #2E7D32;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .extra-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="register-card">
+    <h2>Create an Account</h2>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" name="confirm_password" class="form-control" required>
+      </div>
+
+      <button type="submit" class="btn btn-register w-100">Register</button>
+    </form>
+
+    <div class="extra-links">
+      <p>Already have an account? <a href="{% url 'login_user' %}">Login here</a></p>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

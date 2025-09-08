@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  nav.navbar {
+      display: none !important; /* Hide global navbar */
+  }
+
+  .dashboard-header {
+      background: #198754;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 8px;
+      margin-bottom: 20px;
+  }
+
+  .logout-btn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+  }
+
+  .card {
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .barcode-section input {
+      border-radius: 8px;
+      padding: 10px;
+  }
+
+  .shortcut-btn {
+      display: inline-block;
+      margin-top: 15px;
+  }
+</style>
+
+<div class="container mt-4">
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header position-relative">
+        <h2>Product Verification</h2>
+        <a href="{% url 'logout_user' %}" class="btn btn-danger logout-btn">Logout</a>
+    </div>
+
+    <!-- Verification Card -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-warning fw-bold text-center">
+                    🔍 Verify Product by Barcode
+                </div>
+                <div class="card-body barcode-section">
+                    <form method="POST" action="{% url 'verify_product' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" name="barcode" class="form-control" placeholder="Enter or scan barcode" required>
+                            <button type="submit" class="btn btn-dark">Verify</button>
+                        </div>
+                    </form>
+
+                    {% if verification_result %}
+                        <div class="alert alert-{{ verification_result.status }} mt-3">
+                            {{ verification_result.message }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Back to Profile Button -->
+                    <div class="shortcut-btn">
+                        <a href="{% url 'profile' %}" class="btn btn-outline-success w-100">
+                            ← Back to Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

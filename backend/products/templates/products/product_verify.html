@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2 style="text-align: center; margin-top: 20px; color: #2c3e50;">Scan Product Barcode</h2>
+
+<div style="display: flex; justify-content: center; margin-top: 30px;">
+  <div id="reader" style="width: 320px; border: 2px solid #ccc; border-radius: 8px; padding: 10px;"></div>
+</div>
+
+<div id="scan-result" style="text-align: center; margin-top: 20px; font-size: 1.1em; color: green;"></div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+  function onScanSuccess(decodedText) {
+    // Prevent duplicate scans
+    if (window.lastScannedCode === decodedText) return;
+    window.lastScannedCode = decodedText;
+
+    document.getElementById("scan-result").innerText = "Scanned Barcode: " + decodedText;
+
+    fetch(`/products/verify/${encodeURIComponent(decodedText)}/`)
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || "Product info received.");
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error verifying product.");
+      });
+  }
+
+  const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: { width: 250, height: 250 },
+    rememberLastUsedCamera: true,
+    showTorchButtonIfSupported: true,
+  });
+
+  html5QrcodeScanner.render(onScanSuccess);
+</script>
+{% endblock %}
