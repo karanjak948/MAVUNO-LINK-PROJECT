@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from .models import CartItem, Order
+from .models import Cart, CartItem, Order, OrderItem
 from products.models import Product
 from verification.models import VerifiedProduct
 
@@ -12,7 +12,7 @@ def order_list(request):
     """
     Show all orders for the logged-in user.
     """
-    orders = Order.objects.filter(customer=request.user).select_related("product")
+    orders = Order.objects.filter(customer=request.user).prefetch_related("items__product")
     return render(request, "orders/order_list.html", {"orders": orders})
 
 
@@ -20,28 +20,22 @@ def order_list(request):
 @transaction.atomic
 def add_to_cart(request, product_id):
     """
-    Adds a product to the cart only if:
-      - The product exists
-      - The product is registered in VerifiedProduct
-      - The product is marked is_authentic=True
+    Adds a product to the cart only if verified & authentic.
+    Triggered from marketplace 'Add to Cart' button (POST form).
     """
     if request.method != "POST":
         messages.error(request, "Invalid request.")
-        return redirect("profile")
+        return redirect("marketplace")
 
     product = get_object_or_404(Product, id=product_id)
 
-    # Check verification
-    vp = VerifiedProduct.objects.filter(product=product).first()
+    # ✅ Ensure product is authentic
+    vp = VerifiedProduct.objects.filter(product=product, is_authentic=True).first()
     if not vp:
-        messages.error(request, f"❌ {product.name} is not verified and cannot be added to cart.")
-        return redirect("profile")
+        messages.error(request, f"❌ {product.name} is not authentic and cannot be added to cart.")
+        return redirect("marketplace")
 
-    if not vp.is_authentic:
-        messages.error(request, f"⚠️ {product.name} is FAKE and cannot be purchased.")
-        return redirect("profile")
-
-    # Get quantity (default=1)
+    # ✅ Quantity (default = 1)
     try:
         qty = int(request.POST.get("quantity", 1))
         if qty < 1:
@@ -49,8 +43,11 @@ def add_to_cart(request, product_id):
     except Exception:
         qty = 1
 
-    # Add or update cart item
-    cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
+    # ✅ Get or create user cart
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+
+    # ✅ Add or update cart item
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
     if created:
         cart_item.quantity = qty
     else:
@@ -58,38 +55,59 @@ def add_to_cart(request, product_id):
     cart_item.save()
 
     messages.success(request, f"✅ {product.name} added to your cart (x{cart_item.quantity}).")
-    return redirect("profile")
+    return redirect("cart-detail")
+
+
+@login_required
+def cart_detail(request):
+    """
+    Display cart details with items, quantities, and totals.
+    """
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    return render(request, "orders/cart_detail.html", {"cart": cart})
+
+
+@login_required
+def remove_from_cart(request, item_id):
+    """
+    Remove an item from the cart.
+    """
+    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    item.delete()
+    messages.success(request, "🗑️ Item removed from cart.")
+    return redirect("cart-detail")
 
 
 @login_required
 @transaction.atomic
 def checkout(request):
     """
-    Moves cart items into Orders (only authentic products).
+    Convert cart items into an order with order items.
     """
-    cart_items = CartItem.objects.filter(user=request.user).select_related("product")
-
-    if not cart_items.exists():
+    cart = Cart.objects.filter(user=request.user).first()
+    if not cart or not cart.items.exists():
         messages.warning(request, "Your cart is empty.")
-        return redirect("profile")
+        return redirect("cart-detail")
 
-    for ci in cart_items:
-        # Double-check authenticity before confirming order
+    # ✅ Create new order
+    order = Order.objects.create(customer=request.user, status="pending")
+
+    for ci in cart.items.all():
+        # Double-check authenticity
         vp = VerifiedProduct.objects.filter(product=ci.product, is_authentic=True).first()
         if not vp:
-            messages.error(request, f"❌ {ci.product.name} failed authenticity check. Removed from cart.")
-            ci.delete()
+            messages.error(request, f"❌ {ci.product.name} failed authenticity check. Skipped.")
             continue
 
-        total_price = ci.product.price * ci.quantity
-        Order.objects.create(
-            customer=request.user,
+        OrderItem.objects.create(
+            order=order,
             product=ci.product,
             quantity=ci.quantity,
-            total_price=total_price,
-            status="pending",
+            price=ci.product.price,
         )
-        ci.delete()
 
-    messages.success(request, "✅ Checkout complete. Your order has been placed!")
+    # ✅ Clear cart after checkout
+    cart.items.all().delete()
+
+    messages.success(request, f"✅ Checkout complete. Order #{order.id} placed!")
     return redirect("order-list")

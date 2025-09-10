@@ -1,14 +1,8 @@
-# products/admin.py
+from django.contrib import admin
+from .models import Product
 
-# Django Admin does NOT support mongoengine.Document models.
-# Therefore, we do NOT register the Product model here.
-
-# You can safely leave this file empty or use it for Django ORM models only.
-
-# Example (Django ORM model):
-# from django.contrib import admin
-# from .models import SomeDjangoORMModel
-#
-# @admin.register(SomeDjangoORMModel)
-# class SomeModelAdmin(admin.ModelAdmin):
-#     list_display = ('field1', 'field2')
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'seller', 'category', 'price', 'stock', 'rating', 'expiry_date', 'created_at')
+    list_filter = ('category', 'expiry_date', 'created_at', 'updated_at')
+    search_fields = ('name', 'seller', 'barcode')

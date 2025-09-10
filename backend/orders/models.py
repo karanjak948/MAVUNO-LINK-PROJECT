@@ -11,8 +11,9 @@ class Cart(models.Model):
     def __str__(self):
         return f"Cart {self.id} for {self.user.username}"
 
+    @property
     def total_price(self):
-        return sum(item.total_price() for item in self.items.all())
+        return sum(item.total_price for item in self.items.all())
 
 
 class CartItem(models.Model):
@@ -23,6 +24,7 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.product.name} x {self.quantity}"
 
+    @property
     def total_price(self):
         return (self.product.price or Decimal("0.00")) * self.quantity
 
@@ -33,6 +35,8 @@ class Order(models.Model):
         max_length=20,
         choices=[
             ("pending", "Pending"),
+            ("paid", "Paid"),
+            ("failed", "Failed"),
             ("shipped", "Shipped"),
             ("delivered", "Delivered"),
             ("cancelled", "Cancelled"),
@@ -44,8 +48,9 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} by {self.customer.username}"
 
+    @property
     def total_price(self):
-        return sum(item.total_price() for item in self.items.all())
+        return sum(item.total_price for item in self.items.all())
 
 
 class OrderItem(models.Model):
@@ -57,5 +62,6 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.product.name} x {self.quantity} (Order {self.order.id})"
 
+    @property
     def total_price(self):
         return self.price * self.quantity

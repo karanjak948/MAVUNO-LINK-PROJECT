@@ -25,11 +25,14 @@ class Product(models.Model):
     # 🔹 Barcode for product verification
     barcode = models.CharField(max_length=100, unique=True, default='000000000000')
 
+    # 🔹 Expiry date for perishable/agro-chem products
+    expiry_date = models.DateField(blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['name']  # optional: sorts products by name by default
+        ordering = ['name']
 
     def __str__(self):
         return f"{self.name} ({self.barcode})"

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">🛒 My Cart</h2>
+
+    {% if cart and cart.items.all %}
+        <table class="table table-bordered align-middle shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart.items.all %}
+                <tr>
+                    <td>
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" 
+                                 alt="{{ item.product.name }}" 
+                                 class="img-thumbnail me-2" 
+                                 style="width: 60px; height: 60px; object-fit: cover;">
+                        {% endif %}
+                        {{ item.product.name }}
+                    </td>
+                    <td>KSh {{ item.product.price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>KSh {{ item.total_price }}</td>
+                    <td>
+                        <form method="post" action="{% url 'remove-from-cart' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                🗑 Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr class="fw-bold">
+                    <td colspan="3" class="text-end">Total:</td>
+                    <td colspan="2">KSh {{ cart.total_price }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-between mt-3">
+            <a href="{% url 'product-list' %}" class="btn btn-outline-secondary">
+                ← Continue Shopping
+            </a>
+            <a href="{% url 'checkout' %}" class="btn btn-success">
+                ✅ Proceed to Checkout
+            </a>
+        </div>
+
+    {% else %}
+        <div class="alert alert-info text-center">
+            Your cart is empty. 
+            <a href="{% url 'product-list' %}" class="alert-link">Browse products</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -7,8 +7,8 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
+                    <th>Order ID</th>
+                    <th>Products</th>
                     <th>Total Price</th>
                     <th>Status</th>
                     <th>Ordered On</th>
@@ -17,16 +17,33 @@
             <tbody>
                 {% for order in orders %}
                 <tr>
-                    <td>{{ order.product.name }}</td>
-                    <td>{{ order.quantity }}</td>
-                    <td>{{ order.total_price }}</td>
+                    <td>#{{ order.id }}</td>
+                    <td>
+                        <ul class="list-unstyled">
+                            {% for item in order.items.all %}
+                                <li>
+                                    {{ item.product.name }} × {{ item.quantity }}
+                                    — KSh {{ item.total_price }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td><strong>KSh {{ order.total_price }}</strong></td>
                     <td>
                         {% if order.status == "pending" %}
                             <span class="badge bg-warning text-dark">Pending</span>
-                        {% elif order.status == "completed" %}
-                            <span class="badge bg-success">Completed</span>
+                        {% elif order.status == "paid" %}
+                            <span class="badge bg-success">Paid</span>
+                        {% elif order.status == "failed" %}
+                            <span class="badge bg-danger">Failed</span>
+                        {% elif order.status == "shipped" %}
+                            <span class="badge bg-info text-dark">Shipped</span>
+                        {% elif order.status == "delivered" %}
+                            <span class="badge bg-success">Delivered</span>
+                        {% elif order.status == "cancelled" %}
+                            <span class="badge bg-secondary">Cancelled</span>
                         {% else %}
-                            <span class="badge bg-secondary">{{ order.status }}</span>
+                            <span class="badge bg-light text-dark">{{ order.status }}</span>
                         {% endif %}
                     </td>
                     <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
