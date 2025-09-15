@@ -47,7 +47,7 @@
         </table>
 
         <div class="d-flex justify-content-between mt-3">
-            <a href="{% url 'product-list' %}" class="btn btn-outline-secondary">
+            <a href="{% url 'marketplace' %}" class="btn btn-outline-secondary">
                 ← Continue Shopping
             </a>
             <a href="{% url 'checkout' %}" class="btn btn-success">
@@ -58,7 +58,7 @@
     {% else %}
         <div class="alert alert-info text-center">
             Your cart is empty. 
-            <a href="{% url 'product-list' %}" class="alert-link">Browse products</a>
+            <a href="{% url 'marketplace' %}" class="alert-link">Browse products</a>
         </div>
     {% endif %}
 </div>

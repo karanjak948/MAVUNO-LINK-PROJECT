@@ -27,3 +27,7 @@ def verify_product(request, barcode):
         return JsonResponse({"valid": True, "message": f"✅ {product.name} is verified."})
     except Product.DoesNotExist:
         return JsonResponse({"valid": False, "message": "❌ Product not found."})
+    
+def marketplace(request):
+    products = Product.objects.all()
+    return render(request, "products/marketplace.html", {"products": products})

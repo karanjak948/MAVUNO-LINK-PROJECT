@@ -6,4 +6,5 @@ urlpatterns = [
     path('upload/', views.upload_product, name='upload'),
     path('verify/<str:barcode>/', views.verify_product, name='verify'),
     path('<int:pk>/', views.product_detail, name='detail'),
+    path('', views.marketplace, name='marketplace'),
 ]

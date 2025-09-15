@@ -10,6 +10,9 @@ urlpatterns = [
     path('', home, name='home'),   # Home page
     path('admin/', admin.site.urls),
 
+    # Products
+    path('products/', include('products.urls')),
+
     # Accounts
     path('accounts/', include('accounts.urls')),
 

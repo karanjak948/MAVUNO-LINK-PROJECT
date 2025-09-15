@@ -27,7 +27,11 @@ def add_to_cart(request, product_id):
         messages.error(request, "Invalid request.")
         return redirect("marketplace")
 
-    product = get_object_or_404(Product, id=product_id)
+    # ✅ Try to fetch product safely
+    product = Product.objects.filter(id=product_id).first()
+    if not product:
+        messages.warning(request, "⚠️ That product does not exist anymore.")
+        return redirect("marketplace")
 
     # ✅ Ensure product is authentic
     vp = VerifiedProduct.objects.filter(product=product, is_authentic=True).first()
@@ -58,6 +62,7 @@ def add_to_cart(request, product_id):
     return redirect("cart-detail")
 
 
+
 @login_required
 def cart_detail(request):
     """
@@ -71,11 +76,17 @@ def cart_detail(request):
 def remove_from_cart(request, item_id):
     """
     Remove an item from the cart.
+    Handles cases where the CartItem does not exist.
     """
-    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
-    item.delete()
-    messages.success(request, "🗑️ Item removed from cart.")
+    try:
+        item = CartItem.objects.get(id=item_id, cart__user=request.user)
+        item.delete()
+        messages.success(request, "🗑️ Item removed from cart.")
+    except CartItem.DoesNotExist:
+        messages.warning(request, "⚠️ That item is no longer in your cart.")
+
     return redirect("cart-detail")
+
 
 
 @login_required

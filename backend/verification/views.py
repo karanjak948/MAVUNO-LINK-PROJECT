@@ -29,9 +29,14 @@ def verify_and_add_to_cart(request):
             messages.error(request, "⚠️ This product is FAKE and cannot be purchased.")
             return redirect("verify_product_page")  # fix redirect target
 
-        # Product is authentic → add to cart
+        # ✅ Product is authentic → add to cart/order
         product = verified_product.product
-        order, _ = Order.objects.get_or_create(user=request.user, is_paid=False)
+
+        # Use the correct field names for Order
+        order, _ = Order.objects.get_or_create(
+            customer=request.user,  # not `user`
+            status="pending"        # not `is_paid`
+        )
 
         order_item, created = OrderItem.objects.get_or_create(
             order=order,
