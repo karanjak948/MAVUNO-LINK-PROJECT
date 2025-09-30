@@ -1,0 +1,37 @@
+[
+  {
+    "intent": "greeting",
+    "examples": ["hi", "hello", "hey", "good morning", "good afternoon"],
+    "responses": ["Hi! 👋 How can I help you with our products today?", "Hello — ask me about product price, availability or verification."]
+  },
+  {
+    "intent": "ask_price",
+    "examples": ["how much is fertilizer", "price of maize seeds", "cost of pesticide", "what is the price of *"],
+    "responses": ["Prices vary by dealer. Tell me the product name and I'll fetch the price for you.", "Which product would you like the price for?"]
+  },
+  {
+    "intent": "availability",
+    "examples": ["is urea available", "do you have maize seeds", "is pesticide in stock", "available"],
+    "responses": ["I can check that — send me the product name (or part of it)."]
+  },
+  {
+    "intent": "barcode_check",
+    "examples": ["check 123456789012", "scan 987654321098", "is 000111222333 authentic"],
+    "responses": ["Send the barcode number and I'll check if it's in our verification database."]
+  },
+  {
+    "intent": "thanks",
+    "examples": ["thanks", "thank you", "thx"],
+    "responses": ["You're welcome! If you need anything else ask away 😊"]
+  },
+  {
+    "intent": "goodbye",
+    "examples": ["bye", "goodbye", "see you"],
+    "responses": ["Goodbye — happy farming! 🌱"]
+  },
+  {
+    "intent": "fallback",
+    "examples": [],
+    "responses": ["Sorry, I didn't understand that. Try: 'price of maize seeds', 'is X in stock' or send a barcode."]
+  }
+]

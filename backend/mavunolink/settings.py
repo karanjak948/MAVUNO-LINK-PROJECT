@@ -5,6 +5,11 @@ import pymysql
 pymysql.install_as_MySQLdb()
 
 
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+
+
 # Daraja Stk push
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
