@@ -32,11 +32,10 @@ def verify_and_add_to_cart(request):
         # ✅ Product is authentic → add to cart/order
         product = verified_product.product
 
-        # Use the correct field names for Order
-        order, _ = Order.objects.get_or_create(
-            customer=request.user,  # not `user`
-            status="pending"        # not `is_paid`
-        )
+        # Prevent MultipleObjectsReturned by picking the first pending order
+        order = Order.objects.filter(customer=request.user, status="pending").first()
+        if not order:
+            order = Order.objects.create(customer=request.user, status="pending")
 
         order_item, created = OrderItem.objects.get_or_create(
             order=order,

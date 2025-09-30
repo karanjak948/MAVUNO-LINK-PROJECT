@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">➕ Add a Review</h2>
+
+  <form method="post" class="card shadow-sm p-4">
+    {% csrf_token %}
+
+    {# Case 1: User is free to choose Product or Dealer #}
+    {% if products and dealers %}
+      <div class="mb-3">
+        <label for="reviewType" class="form-label">Review Type</label>
+        <select id="reviewType" name="type" class="form-select" required>
+          <option value="">-- Select --</option>
+          <option value="product">Product</option>
+          <option value="dealer">Dealer</option>
+        </select>
+      </div>
+
+      <div class="mb-3" id="productSelect" style="display:none;">
+        <label for="productId" class="form-label">Select Product</label>
+        <select id="productId" name="product_id" class="form-select">
+          <option value="">-- Choose a product --</option>
+          {% for product in products %}
+            <option value="{{ product.id }}">{{ product.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3" id="dealerSelect" style="display:none;">
+        <label for="dealerId" class="form-label">Select Dealer</label>
+        <select id="dealerId" name="dealer_id" class="form-select">
+          <option value="">-- Choose a dealer --</option>
+          {% for dealer in dealers %}
+            <option value="{{ dealer.id }}">{{ dealer.user.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    {% endif %}
+
+    {# Case 2: Directly reviewing a single Product #}
+    {% if product %}
+      <p><strong>Reviewing Product:</strong> {{ product.name }}</p>
+      <input type="hidden" name="type" value="product">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+    {% endif %}
+
+    {# Case 3: Directly reviewing a single Dealer #}
+    {% if dealer %}
+      <p><strong>Reviewing Dealer:</strong> {{ dealer.user.username }}</p>
+      <input type="hidden" name="type" value="dealer">
+      <input type="hidden" name="dealer_id" value="{{ dealer.id }}">
+    {% endif %}
+
+    {# Common fields for all reviews #}
+    <div class="mb-3">
+      <label for="rating" class="form-label">Rating (1–5)</label>
+      <select id="rating" name="rating" class="form-select" required>
+        <option value="1">⭐ 1</option>
+        <option value="2">⭐⭐ 2</option>
+        <option value="3">⭐⭐⭐ 3</option>
+        <option value="4">⭐⭐⭐⭐ 4</option>
+        <option value="5">⭐⭐⭐⭐⭐ 5</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="comment" class="form-label">Comment</label>
+      <textarea id="comment" name="comment" rows="4" class="form-control" placeholder="Write your review..." required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit Review</button>
+    <a href="{% url 'review_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const typeSelect = document.getElementById("reviewType");
+    const productSelect = document.getElementById("productSelect");
+    const dealerSelect = document.getElementById("dealerSelect");
+
+    if (typeSelect) {
+      typeSelect.addEventListener("change", function() {
+        if (this.value === "product") {
+          productSelect.style.display = "block";
+          dealerSelect.style.display = "none";
+        } else if (this.value === "dealer") {
+          dealerSelect.style.display = "block";
+          productSelect.style.display = "none";
+        } else {
+          productSelect.style.display = "none";
+          dealerSelect.style.display = "none";
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}

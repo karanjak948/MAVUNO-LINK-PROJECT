@@ -5,255 +5,243 @@
 <h2 class="mb-4 fw-bold text-success text-center">🌍 Marketplace</h2>
 <p class="text-muted text-center mb-5">Browse verified products and dealers you can trust.</p>
 
+<form method="get" class="row mb-4">
+    <!-- Search Box -->
+    <div class="col-md-6 mb-2">
+        <input type="text" name="q" class="form-control" placeholder="🔍 Search products..." value="{{ query }}">
+    </div>
+
+    <!-- Category Dropdown -->
+    <div class="col-md-4 mb-2">
+        <select name="category" class="form-select">
+            <option value="All" {% if selected_category == "All" %}selected{% endif %}>All Categories</option>
+            {% for code, name in categories %}
+                <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Submit -->
+    <div class="col-md-2 mb-2">
+        <button type="submit" class="btn btn-success w-100">Filter</button>
+    </div>
+</form>
+
+
 <div class="row g-4">
 
-    <!-- Product 1 -->
+    {# --- Dynamic Products from DB --- #}
+    {% for product in products %}
     <div class="col-md-4">
         <div class="card shadow-sm h-100 border-0 rounded-3">
-            <img src="{% static 'images/maize_seeds1.jpg' %}" class="card-img-top" alt="Maize Seeds" style="height:180px; object-fit:cover;">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height:220px; object-fit:cover;">
+            {% else %}
+                <img src="{% static 'images/default_product.jpg' %}" class="card-img-top" alt="No Image" style="height:220px; object-fit:cover;">
+            {% endif %}
+
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Hybrid Maize Seeds</h5>
+                <h5 class="card-title fw-bold text-success">{{ product.name }}</h5>
+                <span class="badge bg-light text-dark mb-2">{{ product.category }}</span>
+                <p class="card-text text-muted small">{{ product.description|truncatewords:20 }}</p>
+                <p class="fw-bold fs-5 text-success mb-1">KSh {{ product.price }}</p>
+                <p class="text-muted small">In Stock: {{ product.stock }}</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>{{ product.dealer.name }}</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐☆ ({{ product.reviews.count }})</p>
+
+                <div class="mt-auto">
+                    <a href="{% url 'product-detail' product.id %}" class="btn btn-outline-success w-100 mb-2">View Details</a>
+
+                    <form method="post" action="{% url 'add-to-cart' product.id %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="number" name="quantity" value="1" min="1" class="form-control">
+                            <button type="submit" class="btn btn-success">🛒 Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {# --- Static Demo Products (9 hard-coded) --- #}
+
+    <!-- 1. Hybrid Maize Seeds -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-0 rounded-3">
+            <img src="{% static 'images/seeds2.jpg' %}" class="card-img-top" alt="Hybrid Maize Seeds" style="height:220px; object-fit:cover;">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-success">Maize Seeds</h5>
                 <span class="badge bg-light text-dark mb-2">🌱 Seeds</span>
-                <p class="card-text text-muted small">
-                    High-yield hybrid maize seeds resistant to drought and pests. Suitable for both small-scale and large-scale farming.
-                </p>
+                <p class="card-text text-muted small">High-yield hybrid maize seeds resistant to drought and pests. Suitable for both small-scale and large-scale farming.</p>
                 <p class="fw-bold fs-5 text-success mb-1">KSh 2,500</p>
                 <p class="text-muted small">In Stock: 120</p>
                 <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>AgriSeeds Ltd</strong></p>
                 <p class="small text-warning mb-3">⭐⭐⭐⭐☆ (45 reviews)</p>
                 <div class="mt-auto">
                     <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 1 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
+                    <button class="btn btn-success w-100">🛒 Add</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Product 2 -->
+    <!-- 2. Organic Fertilizer -->
     <div class="col-md-4">
         <div class="card shadow-sm h-100 border-0 rounded-3">
-            <img src="{% static 'images/fertilizer1.jpg' %}" class="card-img-top" alt="Fertilizer" style="height:220px; object-fit:cover;">
+            <img src="{% static 'images/fertilizer.png' %}" class="card-img-top" alt="Organic Fertilizer" style="height:220px; object-fit:cover;">
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Organic Fertilizer (50kg)</h5>
-                <span class="badge bg-light text-dark mb-2">🌿 Fertilizers</span>
-                <p class="card-text text-muted small">
-                    Eco-friendly organic fertilizer that improves soil health and crop productivity. Best for cereals and vegetables.
-                </p>
-                <p class="fw-bold fs-5 text-success mb-1">KSh 3,800</p>
-                <p class="text-muted small">In Stock: 60</p>
-                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>GreenGrow Supplies</strong></p>
-                <p class="small text-warning mb-3">⭐⭐⭐⭐⭐ (68 reviews)</p>
+                <h5 class="card-title fw-bold text-success">Organic Fertilizer</h5>
+                <span class="badge bg-light text-dark mb-2">🌱 Fertilizer</span>
+                <p class="card-text text-muted small">Eco-friendly organic fertilizer that improves soil fertility and crop yields.</p>
+                <p class="fw-bold fs-5 text-success mb-1">KSh 1,800</p>
+                <p class="text-muted small">In Stock: 85</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>GreenFarm Ltd</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐⭐ (62 reviews)</p>
                 <div class="mt-auto">
                     <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 2 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
+                    <button class="btn btn-success w-100">🛒 Add</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Product 3 -->
+    <!-- 3. Pesticides -->
     <div class="col-md-4">
         <div class="card shadow-sm h-100 border-0 rounded-3">
-            <img src="{% static 'images/sprayer.jpg' %}" class="card-img-top" alt="Knapsack Sprayer" style="height:220px; object-fit:cover;">
+            <img src="{% static 'images/pesticide.jpg' %}" class="card-img-top" alt="Pesticides" style="height:220px; object-fit:cover;">
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Knapsack Sprayer (16L)</h5>
-                <span class="badge bg-light text-dark mb-2">🛠 Equipment</span>
-                <p class="card-text text-muted small">
-                    Durable 16-liter knapsack sprayer for pesticides and herbicides. Lightweight design with comfortable straps.
-                </p>
-                <p class="fw-bold fs-5 text-success mb-1">KSh 6,200</p>
-                <p class="text-muted small">In Stock: 35</p>
-                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>FarmTools Kenya</strong></p>
-                <p class="small text-warning mb-3">⭐⭐⭐⭐☆ (29 reviews)</p>
+                <h5 class="card-title fw-bold text-success">Crop Pesticides</h5>
+                <span class="badge bg-light text-dark mb-2">🧪 Chemicals</span>
+                <p class="card-text text-muted small">Effective pesticide for controlling common pests in maize and vegetable crops.</p>
+                <p class="fw-bold fs-5 text-success mb-1">KSh 950</p>
+                <p class="text-muted small">In Stock: 200</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>AgroChem Distributors</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐ (31 reviews)</p>
                 <div class="mt-auto">
                     <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 3 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
+                    <button class="btn btn-success w-100">🛒 Add</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Product 4 -->
+    <!-- 4. Mini Tractor -->
     <div class="col-md-4">
         <div class="card shadow-sm h-100 border-0 rounded-3">
-            <img src="{% static 'images/tractor_tyre.jpg' %}" class="card-img-top" alt="Tractor" style="height:220px; object-fit:cover;">
+            <img src="{% static 'images/tractor_tyre.jpg' %}" class="card-img-top" alt="Mini Tractor" style="height:220px; object-fit:cover;">
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Mini Tractor (35HP)</h5>
+                <h5 class="card-title fw-bold text-success">Mini Tractor</h5>
                 <span class="badge bg-light text-dark mb-2">🚜 Machinery</span>
-                <p class="card-text text-muted small">
-                    Compact 35HP tractor ideal for small to medium farms. Fuel-efficient, powerful, and easy to maintain.
-                </p>
-                <p class="fw-bold fs-5 text-success mb-1">KSh 850,000</p>
-                <p class="text-muted small">In Stock: 8</p>
-                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>Agrimech Motors</strong></p>
-                <p class="small text-warning mb-3">⭐⭐⭐⭐⭐ (12 reviews)</p>
+                <p class="card-text text-muted small">Durable and fuel-efficient mini tractor ideal for small to medium farms.</p>
+                <p class="fw-bold fs-5 text-success mb-1">KSh 450,000</p>
+                <p class="text-muted small">In Stock: 10</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>TractoKenya Ltd</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐⭐ (15 reviews)</p>
                 <div class="mt-auto">
                     <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 4 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
+                    <button class="btn btn-success w-100">🛒 Add</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Product 5 -->
+    <!-- 5. Irrigation Kit -->
     <div class="col-md-4">
         <div class="card shadow-sm h-100 border-0 rounded-3">
             <img src="{% static 'images/irrigation_pipes1.jpg' %}" class="card-img-top" alt="Irrigation Kit" style="height:220px; object-fit:cover;">
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Drip Irrigation Kit (1 Acre)</h5>
+                <h5 class="card-title fw-bold text-success">Drip Irrigation Kit</h5>
                 <span class="badge bg-light text-dark mb-2">💧 Irrigation</span>
-                <p class="card-text text-muted small">
-                    Complete drip irrigation kit for 1 acre. Includes pipes, emitters, connectors, and filtration unit.
-                </p>
-                <p class="fw-bold fs-5 text-success mb-1">KSh 45,000</p>
-                <p class="text-muted small">In Stock: 15</p>
-                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>AgriWater Systems</strong></p>
-                <p class="small text-warning mb-3">⭐⭐⭐⭐☆ (22 reviews)</p>
+                <p class="card-text text-muted small">Complete drip irrigation kit for smallholder farmers to save water and boost yields.</p>
+                <p class="fw-bold fs-5 text-success mb-1">KSh 25,000</p>
+                <p class="text-muted small">In Stock: 35</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>Irritech Ltd</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐☆ (28 reviews)</p>
                 <div class="mt-auto">
                     <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 5 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
+                    <button class="btn btn-success w-100">🛒 Add</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Product 6 -->
+    <!-- 6. Greenhouse Covers -->
     <div class="col-md-4">
         <div class="card shadow-sm h-100 border-0 rounded-3">
-            <img src="{% static 'images/pesticide.jpg' %}" class="card-img-top" alt="Pesticide" style="height:220px; object-fit:cover;">
+            <img src="{% static 'images/greenhouse.jpg' %}" class="card-img-top" alt="Greenhouse Covers" style="height:220px; object-fit:cover;">
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Pesticide (5L)</h5>
-                <span class="badge bg-light text-dark mb-2">🧪 Chemicals</span>
-                <p class="card-text text-muted small">
-                    Broad-spectrum pesticide for controlling insects and pests in cereals, fruits, and vegetables.
-                </p>
-                <p class="fw-bold fs-5 text-success mb-1">KSh 2,200</p>
-                <p class="text-muted small">In Stock: 90</p>
-                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>ChemFarm Supplies</strong></p>
-                <p class="small text-warning mb-3">⭐⭐⭐⭐☆ (34 reviews)</p>
-                <div class="mt-auto">
-                    <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 6 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Product 7 -->
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100 border-0 rounded-3">
-            <img src="{% static 'images/greenhouse.jpg' %}" class="card-img-top" alt="Greenhouse" style="height:220px; object-fit:cover;">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Greenhouse (8x30m)</h5>
-                <span class="badge bg-light text-dark mb-2">🏡 Structures</span>
-                <p class="card-text text-muted small">
-                    Steel-framed greenhouse with UV-resistant cover. Perfect for vegetables and flowers.
-                </p>
-                <p class="fw-bold fs-5 text-success mb-1">KSh 320,000</p>
-                <p class="text-muted small">In Stock: 5</p>
-                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>AgriBuild Ltd</strong></p>
-                <p class="small text-warning mb-3">⭐⭐⭐⭐⭐ (17 reviews)</p>
-                <div class="mt-auto">
-                    <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 7 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Product 8 -->
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100 border-0 rounded-3">
-            <img src="{% static 'images/chicken_feed.jpg' %}" class="card-img-top" alt="Animal Feed" style="height:220px; object-fit:cover;">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Dairy Meal (50kg)</h5>
-                <span class="badge bg-light text-dark mb-2">🐄 Animal Feed</span>
-                <p class="card-text text-muted small">
-                    Balanced dairy meal for high milk yield. Enriched with proteins, vitamins, and minerals.
-                </p>
-                <p class="fw-bold fs-5 text-success mb-1">KSh 2,800</p>
-                <p class="text-muted small">In Stock: 40</p>
-                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>FeedMasters</strong></p>
-                <p class="small text-warning mb-3">⭐⭐⭐⭐☆ (19 reviews)</p>
-                <div class="mt-auto">
-                    <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 8 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Product 9 -->
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100 border-0 rounded-3">
-            <img src="{% static 'images/bee_hive.jpg' %}" class="card-img-top" alt="Bee Hive" style="height:220px; object-fit:cover;">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-success">Langstroth Bee Hive</h5>
-                <span class="badge bg-light text-dark mb-2">🍯 Apiculture</span>
-                <p class="card-text text-muted small">
-                    Modern Langstroth beehive designed for honey production. Durable and easy to manage.
-                </p>
+                <h5 class="card-title fw-bold text-success">Greenhouse Covers</h5>
+                <span class="badge bg-light text-dark mb-2">🏡 Equipment</span>
+                <p class="card-text text-muted small">Durable greenhouse polythene covers that protect crops from harsh weather.</p>
                 <p class="fw-bold fs-5 text-success mb-1">KSh 12,000</p>
-                <p class="text-muted small">In Stock: 25</p>
-                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>BeeCare Ltd</strong></p>
-                <p class="small text-warning mb-3">⭐⭐⭐⭐⭐ (11 reviews)</p>
+                <p class="text-muted small">In Stock: 50</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>AgriPlastics</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐☆ (18 reviews)</p>
                 <div class="mt-auto">
                     <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
-                    <form method="post" action="{% url 'add-to-cart' 9 %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            <button type="submit" class="btn btn-success">🛒 Add</button>
-                        </div>
-                    </form>
+                    <button class="btn btn-success w-100">🛒 Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Organic Compost -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-0 rounded-3">
+            <img src="{% static 'images/compost.jpg' %}" class="card-img-top" alt="Organic Compost" style="height:220px; object-fit:cover;">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-success">Organic Compost</h5>
+                <span class="badge bg-light text-dark mb-2">🌱 Fertilizer</span>
+                <p class="card-text text-muted small">High-quality compost made from decomposed organic matter.</p>
+                <p class="fw-bold fs-5 text-success mb-1">KSh 900</p>
+                <p class="text-muted small">In Stock: 150</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>EcoFarms</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐⭐ (24 reviews)</p>
+                <div class="mt-auto">
+                    <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
+                    <button class="btn btn-success w-100">🛒 Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Animal Feed -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-0 rounded-3">
+            <img src="{% static 'images/feed1.jpg' %}" class="card-img-top" alt="Animal Feed" style="height:220px; object-fit:cover;">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-success">Animal Feed</h5>
+                <span class="badge bg-light text-dark mb-2">🐄 Feed</span>
+                <p class="card-text text-muted small">Nutritious feed mix for dairy cattle to increase milk yield.</p>
+                <p class="fw-bold fs-5 text-success mb-1">KSh 3,200</p>
+                <p class="text-muted small">In Stock: 60</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>FarmFeeds</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐ (19 reviews)</p>
+                <div class="mt-auto">
+                    <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
+                    <button class="btn btn-success w-100">🛒 Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. Solar Water Pump -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-0 rounded-3">
+            <img src="{% static 'images/pump.jpg' %}" class="card-img-top" alt="Solar Water Pump" style="height:220px; object-fit:cover;">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-success">Solar Water Pump</h5>
+                <span class="badge bg-light text-dark mb-2">☀️ Energy</span>
+                <p class="card-text text-muted small">Energy-efficient solar-powered pump for reliable irrigation.</p>
+                <p class="fw-bold fs-5 text-success mb-1">KSh 75,000</p>
+                <p class="text-muted small">In Stock: 12</p>
+                <p class="small mb-2"><i class="bi bi-shop"></i> Sold by: <strong>SunAgri Ltd</strong></p>
+                <p class="small text-warning mb-3">⭐⭐⭐⭐⭐ (8 reviews)</p>
+                <div class="mt-auto">
+                    <a href="#" class="btn btn-outline-success w-100 mb-2">View Details</a>
+                    <button class="btn btn-success w-100">🛒 Add</button>
                 </div>
             </div>
         </div>

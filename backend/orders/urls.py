@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Orders
     path('', views.order_list, name='order-list'),
 
     # Cart
@@ -11,5 +12,8 @@ urlpatterns = [
 
     # Checkout
     path('checkout/', views.checkout, name='checkout'),
-]
+    path('checkout/<int:cart_id>/', views.checkout, name='checkout-with-id'),
 
+    # Mpesa
+    path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
+]

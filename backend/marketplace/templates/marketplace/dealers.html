@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-success mb-4">Registered Dealers</h2>
+    {% if dealers %}
+        <div class="row g-4">
+            {% for dealer in dealers %}
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ dealer.name }}</h5>
+                            <p class="card-text">
+                                📧 {{ dealer.email }}<br>
+                                📞 {{ dealer.phone }}<br>
+                                🏠 {{ dealer.address }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-muted">No dealers found.</p>
+    {% endif %}
+</div>
+{% endblock %}

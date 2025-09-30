@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">⭐ All Reviews</h2>
+
+  {% if reviews %}
+    <div class="list-group">
+      {% for review in reviews %}
+        <div class="list-group-item mb-3 shadow-sm p-3 rounded">
+          <h5 class="mb-1">
+            {% if review.product %}
+              🛒 Product: {{ review.product.name }}
+            {% elif review.dealer %}
+              🧑‍🌾 Dealer: {{ review.dealer.user.username }}
+            {% endif %}
+          </h5>
+          <p class="mb-1">⭐ Rating: {{ review.rating }}/5</p>
+          <p class="text-muted">{{ review.comment }}</p>
+          <small class="text-secondary">
+            By {{ review.reviewer.username }} on {{ review.created_at|date:"M d, Y H:i" }}
+          </small>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No reviews yet. Be the first to add one!</p>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    <div class="mt-4">
+      <a href="{% url 'add_review' %}" class="btn btn-primary">➕ Add a Review</a>
+    </div>
+  {% else %}
+    <p class="mt-4">
+      <a href="{% url 'login_user' %}">Login</a> to add a review.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

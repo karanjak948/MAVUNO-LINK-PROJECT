@@ -45,6 +45,22 @@ class Order(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # ✅ Payment & transaction fields (from second version)
+    merchant_request_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    checkout_request_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    transaction_id = models.CharField(max_length=255, blank=True, null=True)
+    is_paid = models.BooleanField(default=False)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["customer", "status"],
+                condition=models.Q(status="pending"),
+                name="unique_pending_order_per_user"
+            )
+        ]
+
     def __str__(self):
         return f"Order #{self.id} by {self.customer.username}"
 

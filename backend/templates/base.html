@@ -99,18 +99,39 @@
           <!-- Marketplace -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">🛒 Marketplace</a>
-            <ul class="dropdown-menu" aria-labelledby="productsDropdown">
-              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}">All Products</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li class="dropdown-header">Sort by</li>
-              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=price_asc">Price: Low → High</a></li>
-              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=price_desc">Price: High → Low</a></li>
-              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=latest">Latest</a></li>
-              <li><a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=popular">Most Popular</a></li>
-              <li><a class="dropdown-item" href="{% url 'dealers' %}">Dealers</a></li>
-            </ul>
-          </li>
+              data-bs-toggle="dropdown" aria-expanded="false">
+              🛒 Marketplace
+            </a>
+                <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+                  <li>
+                    <a class="dropdown-item" href="{% url 'marketplace_home' %}">All Products</a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li class="dropdown-header">Sort by</li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=price_asc{% if query %}&q={{ query }}{% endif %}">
+                      Price: Low → High
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=price_desc{% if query %}&q={{ query }}{% endif %}">
+                      Price: High → Low
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=latest{% if query %}&q={{ query }}{% endif %}">
+                      Latest
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'marketplace_home' %}?sort=popular{% if query %}&q={{ query }}{% endif %}">
+                      Most Popular
+                    </a>
+                  </li>
+                  <li><a class="dropdown-item" href="{% url 'dealers' %}">Dealers</a></li>
+                </ul>
+            </li>
+
 
           <!-- Verification -->
           <li class="nav-item dropdown">
@@ -123,7 +144,7 @@
             </ul>
           </li>
 
-          <li class="nav-item"><a class="nav-link" href="{% url 'reviews_home' %}">⭐ Reviews</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'review_list' %}">⭐ Reviews</a></li>
           <!-- <li class="nav-item"><a class="nav-link" href="{% url 'chatbot_home' %}">🤖 Chatbot</a></li> -->
 
           <!-- Account -->
@@ -143,7 +164,7 @@
   </nav>
 
   <!-- FILTER BAR (only on marketplace pages) -->
-  {% if request.path|slice:":12" == "/marketplace" %}
+  <!-- {% if request.path|slice:":12" == "/marketplace" %}
   <section class="container mt-3">
     <form class="row g-2 align-items-center">
       <div class="col-md-8">
@@ -161,7 +182,7 @@
       </div>
     </form>
   </section>
-  {% endif %}
+  {% endif %} -->
 
   <!-- HOMEPAGE-ONLY CONTENT -->
   {% if request.path == "/" %}
