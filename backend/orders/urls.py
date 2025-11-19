@@ -14,6 +14,14 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path('checkout/<int:cart_id>/', views.checkout, name='checkout-with-id'),
 
-    # Mpesa
+    # Mpesa callback
     path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
+
+    # Cancel pending order
+    path('cancel/<int:order_id>/', views.cancel_pending_order, name='cancel-pending-order'),
+
+
+    # Delete / Clear orders
+    path('clear/<int:order_id>/', views.clear_order, name='clear-order'),
+    path('clear/status/<str:status>/', views.clear_orders_by_status, name='clear-orders-status'),
 ]

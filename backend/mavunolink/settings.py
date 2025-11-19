@@ -2,45 +2,42 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import pymysql
+
+# Setup MySQL
 pymysql.install_as_MySQLdb()
 
-
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-
-
-# Daraja Stk push
+# Load environment variables
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-MPESA_ENV = os.getenv("MPESA_ENV", "sandbox")
-MPESA_CONSUMER_KEY = os.getenv("MPESA_CONSUMER_KEY", "")
-MPESA_CONSUMER_SECRET = os.getenv("MPESA_CONSUMER_SECRET", "")
-MPESA_SHORTCODE = os.getenv("MPESA_SHORTCODE", "174379")
-MPESA_PASSKEY = os.getenv("MPESA_PASSKEY", "")
-MPESA_CALLBACK_URL = os.getenv("MPESA_CALLBACK_URL", "")
-
-
-# Basic config
+# ---------------------------------------------------------
+# 🔐 Django Core Settings
+# ---------------------------------------------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if not DEBUG else []
 
-# Installed apps
+AUTH_USER_MODEL = 'accounts.User'
+
+
+# ✅ Allow localhost and your ngrok domain (update this when ngrok changes)
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "e50ea3b90fe9.ngrok-free.app",  # ← your current ngrok domain
+]
+
+# ---------------------------------------------------------
+# 📦 Installed Apps
+# ---------------------------------------------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'django.contrib.auth',  # Needed for sessions & authentication
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # MongoEngine Admin
-    # 'django_mongoengine',
-    # 'django_mongoengine.mongo_admin',
-
-    # Your apps
+    # Your custom apps
     'accounts',
     'products',
     'marketplace',
@@ -50,7 +47,9 @@ INSTALLED_APPS = [
     'orders',
 ]
 
-# Middleware
+# ---------------------------------------------------------
+# ⚙️ Middleware
+# ---------------------------------------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -63,7 +62,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mavunolink.urls'
 
-# Templates
+# ---------------------------------------------------------
+# 🧩 Templates
+# ---------------------------------------------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -82,12 +83,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mavunolink.wsgi.application'
 
-# MongoDB connection for django_mongoengine
+# ---------------------------------------------------------
+# 🗄️ Database (MySQL)
+# ---------------------------------------------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mavuno',
-        'USER': 'root',      # change to your mysql user
+        'USER': 'root',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '3306',
@@ -98,19 +101,30 @@ DATABASES = {
     }
 }
 
+# ---------------------------------------------------------
+# 💳 M-Pesa Configuration
+# ---------------------------------------------------------
+MPESA_ENV = os.getenv("MPESA_ENV", "sandbox")
+MPESA_CONSUMER_KEY = os.getenv("MPESA_CONSUMER_KEY", "")
+MPESA_CONSUMER_SECRET = os.getenv("MPESA_CONSUMER_SECRET", "")
+MPESA_SHORTCODE = os.getenv("MPESA_SHORTCODE", "174379")
+MPESA_PASSKEY = os.getenv("MPESA_PASSKEY", "")
 
+# ✅ Your live callback URL (from ngrok)
+MPESA_CALLBACK_URL = "https://e50ea3b90fe9.ngrok-free.app/api/mpesa/callback/"
 
-# Custom user model
-AUTH_USER_MODEL = 'accounts.User'
-
-# Localization
+# ---------------------------------------------------------
+# 🌍 Localization
+# ---------------------------------------------------------
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static & media
+# ---------------------------------------------------------
+# 🖼️ Static & Media
+# ---------------------------------------------------------
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'

@@ -50,9 +50,16 @@
             <a href="{% url 'marketplace' %}" class="btn btn-outline-secondary">
                 ← Continue Shopping
             </a>
-            <a href="{% url 'checkout' %}" class="btn btn-success">
-                ✅ Proceed to Checkout
-            </a>
+
+            <!-- ✅ Checkout Form with Phone Number -->
+            <form method="post" action="{% url 'checkout' %}" class="d-flex">
+                {% csrf_token %}
+                <input type="text" name="phone" placeholder="254712345678" 
+                       class="form-control me-2" style="max-width: 200px;" required>
+                <button type="submit" class="btn btn-success">
+                    ✅ Proceed to Checkout & Pay
+                </button>
+            </form>
         </div>
 
     {% else %}

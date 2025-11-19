@@ -1,4 +1,3 @@
-# orders/views.py
 import json
 import logging
 from decimal import Decimal
@@ -28,6 +27,57 @@ def _normalize_phone(phone: str):
     if phone.startswith("0"):
         phone = "254" + phone[1:]
     return phone
+
+# =========================
+# CANCEL PENDING ORDER
+# =========================
+
+@login_required
+def cancel_pending_order(request, order_id):
+    """
+    Mark a pending order as failed (cancelled) instead of deleting it.
+    """
+    order = Order.objects.filter(id=order_id, customer=request.user, status="pending").first()
+    if order:
+        order.status = "failed"
+        order.is_paid = False
+        order.save()
+        messages.success(request, f"⚠️ Pending order #{order_id} has been cancelled.")
+    else:
+        messages.warning(request, "⚠️ Pending order not found or already processed.")
+    return redirect("order-list")
+
+
+
+# =========================
+# ORDER CLEARING / DELETION
+# =========================
+
+@login_required
+def clear_order(request, order_id):
+    """Delete a single order by ID (pending, paid, or failed)."""
+    order = Order.objects.filter(id=order_id, customer=request.user).first()
+    if order:
+        order.delete()
+        messages.success(request, f"🗑️ Order #{order_id} cleared successfully.")
+    else:
+        messages.warning(request, "⚠️ Order not found.")
+    return redirect("order-list")
+
+
+@login_required
+def clear_orders_by_status(request, status):
+    """Delete all orders of a given status: pending, paid, failed."""
+    valid_statuses = ["pending", "paid", "failed"]
+    if status not in valid_statuses:
+        messages.error(request, f"Invalid status: {status}")
+        return redirect("order-list")
+
+    orders = Order.objects.filter(customer=request.user, status=status)
+    count = orders.count()
+    orders.delete()
+    messages.success(request, f"🗑️ Cleared {count} '{status}' orders.")
+    return redirect("order-list")
 
 
 # =========================
@@ -61,10 +111,7 @@ def add_to_cart(request, product_id):
 
     cart, _ = Cart.objects.get_or_create(user=request.user)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-    if created:
-        cart_item.quantity = qty
-    else:
-        cart_item.quantity += qty
+    cart_item.quantity = qty if created else cart_item.quantity + qty
     cart_item.save()
 
     messages.success(request, f"✅ {product.name} added to your cart (x{cart_item.quantity}).")
@@ -101,42 +148,33 @@ def checkout(request, cart_id=None):
     Convert cart items into an order & initiate M-Pesa STK Push.
     If cart_id is given, fetch that cart. Otherwise, use the user's active cart.
     """
-    if cart_id:
-        cart = get_object_or_404(Cart, id=cart_id, user=request.user)
-    else:
-        cart = Cart.objects.filter(user=request.user).first()
-
+    cart = get_object_or_404(Cart, id=cart_id, user=request.user) if cart_id else Cart.objects.filter(user=request.user).first()
     if not cart or not cart.items.exists():
         messages.warning(request, "Your cart is empty.")
         return redirect("cart-detail")
 
     items = list(cart.items.select_related("product").all())
 
-    # ✅ Verify authenticity for all items
+    # Verify authenticity for all items
     for ci in items:
         vp = VerifiedProduct.objects.filter(product=ci.product, is_authentic=True).first()
         if not vp:
             messages.error(request, f"❌ {ci.product.name} is not authentic. Remove it before checkout.")
             return redirect("cart-detail")
 
-    # ✅ Calculate total
+    # Calculate total
     total = sum((ci.product.price or Decimal("0.00")) * ci.quantity for ci in items)
     total = Decimal(total).quantize(Decimal("1.00"))
 
-    # ✅ Create order & items
+    # Create order & items
     order = Order.objects.create(customer=request.user, status="pending", amount=total)
     for ci in items:
-        OrderItem.objects.create(
-            order=order,
-            product=ci.product,
-            quantity=ci.quantity,
-            price=ci.product.price,
-        )
+        OrderItem.objects.create(order=order, product=ci.product, quantity=ci.quantity, price=ci.product.price)
 
-    # ✅ Clear cart after checkout
+    # Clear cart after checkout
     cart.items.all().delete()
 
-    # ✅ Get phone number for M-Pesa
+    # Get phone number for M-Pesa
     user = request.user
     phone = getattr(user, "phone_number", None) or getattr(user, "phone", None) or request.POST.get("phone")
     phone = _normalize_phone(phone)
@@ -145,7 +183,7 @@ def checkout(request, cart_id=None):
         order.delete()
         return redirect("profile")
 
-    # ✅ Initiate STK push
+    # Initiate STK push
     try:
         mpesa_resp = initiate_stk_push(phone, int(total), account_reference=f"Order{order.id}")
     except Exception as e:
@@ -182,34 +220,29 @@ def mpesa_callback(request):
     merchant_req = stk.get("MerchantRequestID")
     checkout_req = stk.get("CheckoutRequestID")
     result_code = stk.get("ResultCode")
-    result_desc = stk.get("ResultDesc")
 
-    # ✅ Find order
-    order = None
-    if merchant_req:
-        order = Order.objects.filter(merchant_request_id=merchant_req).first()
+    # Find order
+    order = Order.objects.filter(merchant_request_id=merchant_req).first() if merchant_req else None
     if not order and checkout_req:
         order = Order.objects.filter(checkout_request_id=checkout_req).first()
 
-    # ✅ Extract metadata
+    # Extract metadata
     mpesa_receipt = None
-    phone = None
-    amount = None
     meta_items = stk.get("CallbackMetadata", {}).get("Item", [])
     for item in meta_items:
         name = item.get("Name", "").lower()
         if name == "mpesareceiptnumber":
             mpesa_receipt = item.get("Value")
-        if name == "amount":
-            amount = item.get("Value")
-        if name == "phonenumber":
-            phone = item.get("Value")
+        elif name == "amount":
+            pass
+        elif name == "phonenumber":
+            pass
 
     if not order:
         logger.warning("Received unmatched M-Pesa callback", extra={"merchant": merchant_req, "checkout": checkout_req})
         return JsonResponse({"ResultCode": 0, "ResultDesc": "No matching order"})
 
-    # ✅ Update order
+    # Update order
     if result_code == 0:
         order.is_paid = True
         order.status = "paid"

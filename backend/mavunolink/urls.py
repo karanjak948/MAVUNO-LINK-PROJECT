@@ -33,6 +33,9 @@ urlpatterns = [
 
     # Orders
     path('orders/', include('orders.urls')),
+
+    # Mpesa
+    path('api/mpesa/', include('mpesa.urls')),
 ]
 
 if settings.DEBUG:

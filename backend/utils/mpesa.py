@@ -1,4 +1,3 @@
-# utils/mpesa.py
 import base64
 from datetime import datetime, timedelta
 import logging
@@ -37,6 +36,9 @@ def initiate_stk_push(phone_number: str, amount: int, account_reference: str, tr
     passwd_raw = settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp
     password = base64.b64encode(passwd_raw.encode()).decode()
 
+    # ✅ Updated callback to your ngrok tunnel
+    callback_url = "https://e50ea3b90fe9.ngrok-free.app/api/mpesa/callback/"
+
     payload = {
         "BusinessShortCode": settings.MPESA_SHORTCODE,
         "Password": password,
@@ -46,7 +48,7 @@ def initiate_stk_push(phone_number: str, amount: int, account_reference: str, tr
         "PartyA": phone_number,
         "PartyB": settings.MPESA_SHORTCODE,
         "PhoneNumber": phone_number,
-        "CallBackURL": settings.MPESA_CALLBACK_URL,
+        "CallBackURL": callback_url,  # 🔗 your live ngrok callback
         "AccountReference": account_reference,
         "TransactionDesc": transaction_desc,
     }
